@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 
 def load_ratings(path='data/raw/ml-100k/u.data'):
@@ -23,6 +24,18 @@ def load_users(path='data/raw/ml-100k/u.user'):
     return users
 
 
+def get_train_test_split(ratings, test_size=0.2, random_state=42):
+    """
+    Ratings ko train aur test mein split karta hai.
+    Random split use kar rahe hain (stratify nahi kar rahe kyunke
+    har user/item ke paas kaafi ratings nahi hoti stratify ke liye).
+    """
+    train, test = train_test_split(
+        ratings, test_size=test_size, random_state=random_state
+    )
+    return train, test
+
+
 if __name__ == "__main__":
     ratings = load_ratings()
     movies = load_movies()
@@ -37,4 +50,3 @@ if __name__ == "__main__":
 
     print("\nUsers sample:")
     print(users.head())
-    
