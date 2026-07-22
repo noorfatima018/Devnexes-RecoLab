@@ -25,7 +25,7 @@ content-based filtering to address this challenge.
 - [x] Baseline popularity-based recommender
 - [x] Evaluation framework (Precision@K)
 - [x] Collaborative filtering (SGD-based matrix factorization, implemented from scratch)
-- [ ] Content-based filtering (in progress)
+- [x] Content-based filtering (genre-based cosine similarity)
 - [ ] Hybrid model with cold-start handling (in progress)
 - [ ] Interactive interface (Streamlit)
 
@@ -34,6 +34,7 @@ content-based filtering to address this challenge.
 - **Data Processing:** pandas, numpy
 - **ML/Recommendation:** scikit-learn (scikit-surprise attempted but blocked — see Limitations)
 - **Visualization:** matplotlib, seaborn
+- **Testing:** pytest
 - **Interface (planned):** Streamlit
 - **Version Control:** Git + GitHub
 
@@ -70,9 +71,19 @@ python -m src.baseline_model
 python -m src.collaborative_filtering
 ```
 
-7. Run full evaluation (compares all models):
+7. Run content-based filtering model:
+```bash
+python -m src.content_based
+```
+
+8. Run full evaluation (compares baseline and collaborative filtering):
 ```bash
 python -m src.evaluation
+```
+
+9. Run automated tests:
+```bash
+python -m pytest tests/ -v
 ```
 
 ## Results So Far
@@ -100,33 +111,72 @@ personalization adds meaningful value over simple popularity-based recommendatio
 - Produces genuinely personalized recommendations (verified manually — different users
   receive distinctly different top-10 lists)
 
+**Content-Based Filtering Model:**
+- Uses movie genre metadata to compute item-to-item similarity via cosine similarity
+- Recommends movies similar to ones a user has rated highly, based purely on genre overlap
+- Does not require any user rating history to make sense of an item — useful for
+  cold-start scenarios where collaborative filtering has no signal
+- Verified manually: recommendations for "Toy Story (1995)" correctly returned other
+  family/animated/comedy titles (e.g. Aladdin, Home Alone, Goofy Movie)
+- Covered by automated tests confirming no duplicate recommendations, no self-recommendation,
+  and correct filtering of already-consumed items
+
 **Dataset Insights:**
 - Sparsity: ~93.7% of user-movie combinations have no rating
 - Long-tail distribution: majority of movies have very few ratings — highlighting the
   cold-start challenge this project aims to solve
+
+## Error Analysis
+
+An error analysis was performed on the Collaborative Filtering model's test-set predictions.
+
+**Finding:** The model's worst predictions consistently follow one pattern — it over-predicts
+ratings (4.5–5) for movies that are generally well-liked in the training data (e.g. Shawshank
+Redemption, Ben-Hur, Annie Hall), even when a specific test user rated them very low (1).
+
+**Root Cause:** This reflects a cold-start / sparse-data limitation. For users with limited
+rating history, the model has insufficient signal to learn their individual taste, so its
+predictions drift toward the item's general popularity rather than the user's specific
+preference.
+
+**Example Failed Predictions:**
+
+| User | Movie | Actual Rating | Predicted Rating | Error |
+|---|---|---|---|---|
+| 1 | Babe (1995) | 1 | 5.00 | 4.00 |
+| 405 | Another Stakeout (1993) | 5 | 1.00 | 4.00 |
+| 312 | Die Hard (1988) | 1 | 4.98 | 3.98 |
+| 38 | Ben-Hur (1959) | 1 | 4.85 | 3.85 |
+
+**Implication:** This finding directly motivates the hybrid model — combining collaborative
+filtering with content-based filtering should help the system make better predictions for
+users with sparse rating history, rather than defaulting to general popularity.
 
 ## Testing Notes
 - Manual verification of data loading against known MovieLens statistics (943 users, 1682 movies, 100000 ratings) — confirmed match
 - Baseline model output manually reviewed for sanity (recommends well-known, highly-rated films)
 - Collaborative filtering training RMSE monitored across epochs to confirm stable convergence
 - Manually verified that different users receive different recommendation lists (confirms personalization is working)
+- Automated tests (pytest) for content-based filtering: no duplicate recommendations,
+  no self-recommendation, and correct exclusion of already-consumed items — all passing
 
 ## Limitations (Current Stage)
 - `scikit-surprise` library could not be used due to a system-level Application Control
   policy blocking its compiled binaries — collaborative filtering was implemented manually
   using NumPy as a result
-- Cold-start handling not yet implemented (planned for upcoming weeks)
-- Content-based filtering not yet implemented
+- Cold-start handling and hybrid model combination not yet implemented (planned next)
+- Content-based filtering currently uses genre data only; does not yet incorporate other
+  metadata (e.g. cast, director, release year)
 - Evaluation currently limited to Precision@K; additional metrics (NDCG, Recall@K) planned
 - Collaborative filtering currently uses random initialization with a fixed seed;
   hyperparameters (factors, learning rate, epochs) not yet tuned
 
 ## Future Improvements
-- Add content-based filtering using movie genres
-- Combine into hybrid model with cold-start fallback logic
+- Combine collaborative and content-based models into a hybrid model with cold-start fallback logic
+- Tune collaborative filtering hyperparameters (factors, learning rate, epochs, regularization)
 - Build Streamlit interface for interactive testing
 - Expand evaluation metrics (NDCG, coverage, diversity)
-- Tune collaborative filtering hyperparameters (factors, learning rate, epochs, regularization)
+- Incorporate additional item metadata into content-based filtering
 
 ## Author
 Noor Fatima — Devnexes AI/ML Internship
