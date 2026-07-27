@@ -11,6 +11,21 @@ class CollaborativeFilteringModel:
     training ke dauran ye vectors is tarah adjust hote hain ke
     predicted rating (dot product) actual rating ke jitna qareeb ho.
     """
+    def save(self, filepath):
+        """Model ko file mein save karta hai (numpy format mein)"""
+        import pickle
+        with open(filepath, 'wb') as f:
+            pickle.dump(self, f)
+        print(f"Model saved to {filepath}")
+
+    @staticmethod
+    def load(filepath):
+        """Saved model ko wapis load karta hai"""
+        import pickle
+        with open(filepath, 'rb') as f:
+            model = pickle.load(f)
+        print(f"Model loaded from {filepath}")
+        return model
 
     def __init__(self, n_factors=20, learning_rate=0.01, regularization=0.02,
                  n_epochs=20, random_state=42):
@@ -102,6 +117,7 @@ class CollaborativeFilteringModel:
         top_n = predictions[:n]
 
         return [item_id for item_id, _ in top_n]
+
 
 
 if __name__ == "__main__":

@@ -111,6 +111,24 @@ personalization adds meaningful value over simple popularity-based recommendatio
 - Produces genuinely personalized recommendations (verified manually — different users
   receive distinctly different top-10 lists)
 
+  **Hyperparameter Tuning:**
+
+Five configurations were tested by varying `n_factors` and `learning_rate`:
+
+| n_factors | learning_rate | n_epochs | Precision@10 |
+|---|---|---|---|
+| 10 | 0.01 | 20 | 0.0728 |
+| **20** | **0.01** | **20** | **0.0810** (best) |
+| 30 | 0.01 | 20 | 0.0766 |
+| 20 | 0.005 | 30 | 0.0793 |
+| 20 | 0.02 | 20 | 0.0648 |
+
+The best configuration (`n_factors=20, learning_rate=0.01, n_epochs=20`) matched the original
+default setup. Too few factors (10) underfit the data, too many (30) showed signs of
+overfitting, and a higher learning rate (0.02) caused unstable convergence. The final tuned
+model is saved as an artifact at `models/collaborative_filtering_best.pkl` for reuse without
+retraining.
+
 **Content-Based Filtering Model:**
 - Uses movie genre metadata to compute item-to-item similarity via cosine similarity
 - Recommends movies similar to ones a user has rated highly, based purely on genre overlap
