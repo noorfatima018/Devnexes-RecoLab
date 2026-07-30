@@ -26,7 +26,7 @@ content-based filtering to address this challenge.
 - [x] Evaluation framework (Precision@K)
 - [x] Collaborative filtering (SGD-based matrix factorization, implemented from scratch)
 - [x] Content-based filtering (genre-based cosine similarity)
-- [ ] Hybrid model with cold-start handling (in progress)
+- - [x] Hybrid model with cold-start handling (switching strategy)
 - [ ] Interactive interface (Streamlit)
 
 ## Technology Stack
@@ -143,6 +143,31 @@ retraining.
 - Sparsity: ~93.7% of user-movie combinations have no rating
 - Long-tail distribution: majority of movies have very few ratings — highlighting the
   cold-start challenge this project aims to solve
+
+  **Hybrid Model:**
+
+Combines all three models using a switching strategy based on how much rating history a
+user has:
+
+| User Type | Ratings Count | Strategy Used |
+|---|---|---|
+| Brand-new user (no ratings) | 0 | Popularity fallback |
+| Sparse user | < 5 | Content-based filtering |
+| Regular user | ≥ 5 | Collaborative filtering |
+
+For new items with no rating history, the model falls back to content-based similarity,
+since collaborative filtering has no signal for items no one has rated yet.
+
+**Verified scenarios:**
+- Regular user (405, active history) → Collaborative Filtering → personalized recommendations
+- Brand-new user (no history) → Popularity fallback → safe, broadly-liked recommendations
+- New item (Toy Story) → Content-based → genre-similar movies (Aladdin, Goofy Movie, etc.)
+- Note: MovieLens 100K only includes users with ≥20 ratings by design, so no naturally
+  "sparse" users (< 5 ratings) exist in this dataset — this fallback path was verified
+  using a simulated new-user scenario instead.
+
+Covered by automated tests (pytest) verifying correct strategy selection per scenario and
+confirming no already-rated items appear in recommendations.
 
 ## Error Analysis
 
