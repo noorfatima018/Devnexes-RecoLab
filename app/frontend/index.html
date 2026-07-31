@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RecoLab — Movie Recommendations</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+    <div class="header-content">
+        <h1> RecoLab</h1>
+        <p class="subtitle">Hybrid Movie Recommendation Engine — Devnexes AI/ML Internship</p>
+    </div>
+</header>
+
+<main class="container">
+
+    <section class="card selector-card">
+        <h2>Step 1 — Tell Us About Yourself</h2>
+
+        <div class="user-type-toggle">
+            <button id="existingUserBtn" class="toggle-btn active">Existing User</button>
+            <button id="newUserBtn" class="toggle-btn">New User</button>
+        </div>
+
+        <div id="existingUserSection" class="input-section">
+            <label for="userSelect">Select your User ID:</label>
+            <select id="userSelect">
+                <option value="">Loading users...</option>
+            </select>
+        </div>
+
+        <div id="newUserSection" class="input-section hidden">
+            <label>Select genres you enjoy:</label>
+            <div id="genreChips" class="genre-chips">
+                <span class="loading-text">Loading genres...</span>
+            </div>
+        </div>
+
+        <button id="getRecsBtn" class="primary-btn"> Get My Recommendations</button>
+    </section>
+
+    <section id="loadingSection" class="loading-section hidden">
+        <div class="spinner"></div>
+        <p>Finding the perfect movies for you...</p>
+    </section>
+
+    <section id="errorSection" class="error-section hidden">
+        <p id="errorMessage"></p>
+    </section>
+
+    <section id="resultsSection" class="results-section hidden">
+        <div class="explanation-banner">
+            <p id="explanationText"></p>
+        </div>
+        <div id="movieGrid" class="movie-grid"></div>
+    </section>
+
+</main>
+
+<footer class="footer">
+    <p>Built by Noor Fatima — Devnexes AI/ML Internship Project</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
