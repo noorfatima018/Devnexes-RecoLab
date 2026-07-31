@@ -1,5 +1,15 @@
 # Devnexes RecoLab — Hybrid Recommendation Engine with Cold-Start Handling
 
+## 🔗 Live Demo
+
+- **Frontend (Web App):** https://devnexes-reco-lab.vercel.app/
+- **Backend API:** https://nf18.pythonanywhere.com
+
+> Note: The deployed backend runs on a free hosting tier that restricts outbound calls to
+> external APIs, so movie posters may show as genre-colored placeholder cards instead of
+> real TMDB posters in the live demo. Posters work fully when the backend is run locally
+> with a TMDB API key configured (see Setup Instructions).
+
 ## Problem Statement
 Recommendation systems power modern platforms (Netflix, Amazon, Spotify) by helping users
 discover relevant items. A major challenge in these systems is the **cold-start problem** —
@@ -39,6 +49,10 @@ content-based filtering to address this challenge.
 - **Frontend:** HTML, CSS, JavaScript (vanilla, no framework)
 - **External API:** TMDB (The Movie Database) for movie posters
 - **Version Control:** Git + GitHub
+
+## Deployment
+- **Frontend:** Deployed on Vercel (static hosting) from `app/frontend/`
+- **Backend:** Deployed on PythonAnywhere (Flask via WSGI), serving the trained models and API endpoints
 
 ## Setup Instructions
 
