@@ -26,8 +26,8 @@ content-based filtering to address this challenge.
 - [x] Evaluation framework (Precision@K)
 - [x] Collaborative filtering (SGD-based matrix factorization, implemented from scratch)
 - [x] Content-based filtering (genre-based cosine similarity)
-- - [x] Hybrid model with cold-start handling (switching strategy)
-- [ ] Interactive interface (Streamlit)
+- [x] Hybrid model with cold-start handling (switching strategy)
+- [x] Interactive web interface (Flask API + HTML/CSS/JS frontend with TMDB poster integration)
 
 ## Technology Stack
 - **Language:** Python 3.14
@@ -35,7 +35,9 @@ content-based filtering to address this challenge.
 - **ML/Recommendation:** scikit-learn (scikit-surprise attempted but blocked — see Limitations)
 - **Visualization:** matplotlib, seaborn
 - **Testing:** pytest
-- **Interface (planned):** Streamlit
+- **Backend API:** Flask, Flask-CORS
+- **Frontend:** HTML, CSS, JavaScript (vanilla, no framework)
+- **External API:** TMDB (The Movie Database) for movie posters
 - **Version Control:** Git + GitHub
 
 ## Setup Instructions
@@ -86,6 +88,17 @@ python -m src.evaluation
 python -m pytest tests/ -v
 ```
 
+10. Create a `.env` file in the project root with your TMDB API key:
+
+(Get a free key at https://www.themoviedb.org/settings/api)
+
+11. Run the backend API (in one terminal):
+```bash
+python -m flask --app app.backend.api run --port 5000
+```
+
+12. Open `app/frontend/index.html` in your browser (with the backend running)
+
 ## Results So Far
 
 **Model Comparison (Precision@10):**
@@ -111,7 +124,7 @@ personalization adds meaningful value over simple popularity-based recommendatio
 - Produces genuinely personalized recommendations (verified manually — different users
   receive distinctly different top-10 lists)
 
-  **Hyperparameter Tuning:**
+**Hyperparameter Tuning:**
 
 Five configurations were tested by varying `n_factors` and `learning_rate`:
 
@@ -139,12 +152,7 @@ retraining.
 - Covered by automated tests confirming no duplicate recommendations, no self-recommendation,
   and correct filtering of already-consumed items
 
-**Dataset Insights:**
-- Sparsity: ~93.7% of user-movie combinations have no rating
-- Long-tail distribution: majority of movies have very few ratings — highlighting the
-  cold-start challenge this project aims to solve
-
-  **Hybrid Model:**
+**Hybrid Model:**
 
 Combines all three models using a switching strategy based on how much rating history a
 user has:
@@ -168,6 +176,25 @@ since collaborative filtering has no signal for items no one has rated yet.
 
 Covered by automated tests (pytest) verifying correct strategy selection per scenario and
 confirming no already-rated items appear in recommendations.
+
+**Web Interface:**
+- Built a custom Flask REST API (`app/backend/api.py`) exposing endpoints for existing-user
+  recommendations, new-user genre-based recommendations, and metadata (users, genres)
+- Integrated the TMDB API to fetch real movie posters by title, with in-memory caching to
+  avoid redundant API calls
+- Built a custom frontend (`app/frontend/`) using HTML/CSS/JavaScript — no framework
+  dependencies — featuring:
+  - Existing user vs. new user selection flow
+  - Genre-based onboarding for new users (cold-start UX)
+  - Real movie posters (with a genre-colored gradient fallback if a poster isn't found)
+  - Explanation banner showing which strategy (collaborative filtering, content-based,
+    popularity fallback, or genre preference) produced each recommendation set
+  - Loading and error states for a professional, non-technical user experience
+
+**Dataset Insights:**
+- Sparsity: ~93.7% of user-movie combinations have no rating
+- Long-tail distribution: majority of movies have very few ratings — highlighting the
+  cold-start challenge this project aims to solve
 
 ## Error Analysis
 
@@ -202,24 +229,28 @@ users with sparse rating history, rather than defaulting to general popularity.
 - Manually verified that different users receive different recommendation lists (confirms personalization is working)
 - Automated tests (pytest) for content-based filtering: no duplicate recommendations,
   no self-recommendation, and correct exclusion of already-consumed items — all passing
+- Automated tests (pytest) for the hybrid model: correct strategy selection per user type,
+  and no already-rated items appearing in recommendations — all passing
+- Manually tested the web interface end-to-end for both existing-user and new-user flows,
+  including error handling when the backend is unreachable
 
 ## Limitations (Current Stage)
 - `scikit-surprise` library could not be used due to a system-level Application Control
   policy blocking its compiled binaries — collaborative filtering was implemented manually
   using NumPy as a result
-- Cold-start handling and hybrid model combination not yet implemented (planned next)
 - Content-based filtering currently uses genre data only; does not yet incorporate other
   metadata (e.g. cast, director, release year)
 - Evaluation currently limited to Precision@K; additional metrics (NDCG, Recall@K) planned
-- Collaborative filtering currently uses random initialization with a fixed seed;
-  hyperparameters (factors, learning rate, epochs) not yet tuned
+- MovieLens 100K only includes users with ≥20 ratings by design, so the "sparse user"
+  fallback path in the hybrid model could not be verified with a naturally-occurring user
+- Poster fetching depends on the TMDB API being available and an API key being configured;
+  the app falls back to genre-colored placeholder cards if a poster can't be found
 
 ## Future Improvements
-- Combine collaborative and content-based models into a hybrid model with cold-start fallback logic
-- Tune collaborative filtering hyperparameters (factors, learning rate, epochs, regularization)
-- Build Streamlit interface for interactive testing
 - Expand evaluation metrics (NDCG, coverage, diversity)
-- Incorporate additional item metadata into content-based filtering
+- Incorporate additional item metadata into content-based filtering (cast, director, year)
+- Add automated bias/fairness analysis across user and item groups
+- Deploy the backend and frontend to a public hosting service for a live demo link
 
 ## Author
 Noor Fatima — Devnexes AI/ML Internship
