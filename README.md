@@ -222,6 +222,36 @@ preference.
 filtering with content-based filtering should help the system make better predictions for
 users with sparse rating history, rather than defaulting to general popularity.
 
+## Bias Analysis
+
+A bias analysis was conducted on the Collaborative Filtering model to check whether
+prediction accuracy varies unfairly across genres or movie popularity levels.
+
+**Genre-Level Bias:** Prediction error showed a general tendency to be higher for genres
+with fewer ratings in the dataset (e.g. Documentary, Horror, Musical) compared to
+well-represented genres (e.g. Drama, Comedy), though the relationship was not strictly linear.
+
+**Popularity Bias (Primary Finding):** A clear, consistent pattern was found based on how
+popular a movie is (number of ratings in the training set):
+
+| Popularity Bucket | Avg Prediction Error |
+|---|---|
+| Very Low (<10 ratings) | 0.89 |
+| Low (10-49 ratings) | 0.76 |
+| Medium (50-149 ratings) | 0.74 |
+| High (150+ ratings) | 0.71 |
+
+The model is measurably less accurate for niche/unpopular movies than for popular ones
+(~26% higher error for the least popular bucket vs. the most popular). This is a well-known
+bias pattern in collaborative filtering — items with sparse interaction data get less
+reliable predictions, which can reinforce a cycle where popular items are recommended more
+and niche items are overlooked.
+
+**Implication:** This finding reinforces the value of the hybrid model. Content-based
+filtering, relying on item metadata rather than interaction history, is not subject to
+this popularity bias and can reasonably recommend niche movies based on genre similarity.
+The hybrid model's switching strategy partially mitigates the practical impact of this bias.
+
 ## Testing Notes
 - Manual verification of data loading against known MovieLens statistics (943 users, 1682 movies, 100000 ratings) — confirmed match
 - Baseline model output manually reviewed for sanity (recommends well-known, highly-rated films)
